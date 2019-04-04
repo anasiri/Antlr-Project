@@ -68,7 +68,7 @@ bitwiseNotExp:exponentiationExp (bitwiseNotOperator exponentiationExp)*;
 exponentiationExp :parenthesesExp(exponentiationOperator parenthesesExp)*;
 parenthesesExp:(lPar (expression) rPar)|variable;
 
-variable: (ID|IntNumbers|ConstantsVal|FloatingNumbers);
+variable: (ID|IntNumbers|ConstantsVal|SCIENTIFIC_NUMBER|FloatingNumbers);
 
 assignmentOperators:ASSIGN|ASSIGNEXPON|ASSIGNDIV|ASSIGNFDIV|ASSIGNMULT|ASSIGNREM|ASSIGNMINUS|ASSIGNPLUS;
 comparingOperators:GTHANEQ|GTHAN|LTHANEQ|LTHAN;
@@ -100,18 +100,19 @@ intDecleration: IntType;
 floatDecleration:FloatType;
 constantsDecleration:ConstantsType;
 
-VarTypes:'int'|'flaot'|'constants';
+VarTypes:'int'|'float'|'constants';
 IntType: 'int ';
 FloatType: 'float ';
 ConstantsType: 'constants ';
 
-intVal :IntNumbers;
-floatVal:FloatingNumbers;
+intVal :IntNumbers|SCIENTIFIC_NUMBER;
+floatVal:FloatingNumbers|SCIENTIFIC_NUMBER;
 constantsVal :ConstantsVal;
 
 IntNumbers:NUMBER+;
-FloatingNumbers:NUMBER+('f'|('.'NUMBER+)?('f'?));
+FloatingNumbers:NUMBER+('.'NUMBER+)?;
 ConstantsVal:TRUE|FALSE|'null'|'ioat';
+SCIENTIFIC_NUMBER: FloatingNumbers('e' (PLUS|Minus)? NUMBER)?;
 
 
 TRUE :'true';
@@ -123,12 +124,10 @@ identifier:ID;
 
 
 ID:LETTERS+(LETTERS|NUMBER)+;
-fragment LETTERS
-    : 'a'..'z'|'A'..'Z'
-    ;
-fragment NUMBER
-   : ('0' .. '9') + ('.' ('0' .. '9') +)?
-   ;
+fragment LETTERS: 'a'..'z'|'A'..'Z';
+
+
+fragment NUMBER: '0' .. '9';
 
 
 /////////////Operators/////////
@@ -262,4 +261,6 @@ OR:'or';
 SE :('\n<\n' |'\n>')-> skip;
 WS: (' ' | '\t') -> skip;
 NL: '\r'? '\n' -> skip;
+BlockComment : '/*' .*? '*/' -> skip;
+LineComment :'@' .*? '\n' ->skip;
 //Semi: ';'-> skip;
