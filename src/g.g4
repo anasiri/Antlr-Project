@@ -30,42 +30,63 @@ functionIdentifier :identifier;
 
 
 //if Statement
-ifStatement:'if' '('conditionalExpressions')';
+ifStatement:'if' '('conditionalExpressions')'(statement|'{'statement'}');
 
 //for Statement
-forStatement:'z';
+forStatement:'for('variableDecleration';'conditionalExpressions';'equalityExp'){'statement'}';
 
 //While Statement
-whileStatement:'d';
+whileStatement:'while('conditionalExpressions'){'statement'}';
 
 //SwitchCase Statement
 switchCaseStatement:'c';
 
 
 //Conditional Expression
-conditionalExpressions
-    :
-    conditionalExpression?(logicalOperators conditionalExpression|'!'(conditionalExpression))*;
-conditionalExpression
-	: expression conditionalOperators expression|NOT expression|ID|TRUE|FALSE;
+conditionalExpressions: conditionalOr ;
+conditionalOr: conditionalOr(OR conditionalAnd)|conditionalAnd ;
+conditionalAnd:conditionalAnd(AND term)|term;
+term: x|NOT term|ID |TRUE|FALSE;
+x:bitwiseExp((comparingOperators|equalityOperators) bitwiseExp)+;
+//comparingExpx:comparingExpx(equalityOperators bitwiseExp)|equalityExp(comparingOperators equalityExp);
 
+TRUE :'true';
+FALSE:'false';
 
+NOT:'not';
+AND:'and';
+OR:'or';
+
+//Exp old Version
+//equation:identifier assignmentOperators expression';';
+//
+//expression: comparingExp;
+//comparingExp:equalityExp(comparingOperators equalityExp)*;
+//equalityExp :bitwiseExp(equalityOperators bitwiseExp)*;
+//bitwiseExp :shiftExp(bitwiseOperators shiftExp)*;
+//shiftExp:hashtagExp(shiftOperators hashtagExp)*;
+//hashtagExp :plusMinusExp(hashtagOperators plusMinusExp)*;
+//plusMinusExp:multDivExp(plustMinusOperators multDivExp)*;
+//multDivExp:signExp (multDivOperators signExp)*;
+//signExp:signOperators bitwiseNotExp ;
+//bitwiseNotExp:exponentiationExp (bitwiseNotOperator exponentiationExp)*;
+//exponentiationExp :parenthesesExp(exponentiationOperator parenthesesExp)*;
+//parenthesesExp:(lPar (expression) rPar)|variable;
 
 //Expressions
-
 equation:identifier assignmentOperators expression';';
 
 expression: comparingExp;
-comparingExp:equalityExp(comparingOperators equalityExp)*;
-equalityExp :bitwiseExp(equalityOperators bitwiseExp)*;
-bitwiseExp :shiftExp(bitwiseOperators shiftExp)*;
-shiftExp:hashtagExp(shiftOperators hashtagExp)*;
-hashtagExp :plusMinusExp(hashtagOperators plusMinusExp)*;
-plusMinusExp:multDivExp(plustMinusOperators multDivExp)*;
-multDivExp:signExp (multDivOperators signExp)*;
+comparingExp:comparingExp(comparingOperators equalityExp)|equalityExp;
+equalityExp :equalityExp(equalityOperators bitwiseExp)|bitwiseExp;
+bitwiseExp :bitwiseExp(bitwiseOperators shiftExp)|shiftExp;
+shiftExp:hashtagExp(shiftOperators shiftExp)|hashtagExp;
+hashtagExp :plusMinusExp(hashtagOperators hashtagExp)|plusMinusExp;
+plusMinusExp:plusMinusExp(plustMinusOperators multDivExp)|multDivExp;
+multDivExp:multDivExp (multDivOperators signExp)|signExp;
 signExp:signOperators bitwiseNotExp ;
 bitwiseNotExp:exponentiationExp (bitwiseNotOperator exponentiationExp)*;
-exponentiationExp :parenthesesExp(exponentiationOperator parenthesesExp)*;
+exponentiationExp :parenthesesExp (exponentiationOperator exponentiationExp)|parenthesesExp;
 parenthesesExp:(lPar (expression) rPar)|variable;
 
 variable: (ID|IntNumbers|ConstantsVal|SCIENTIFIC_NUMBER|FloatingNumbers);
@@ -112,11 +133,8 @@ constantsVal :ConstantsVal;
 IntNumbers:NUMBER+;
 FloatingNumbers:NUMBER+('.'NUMBER+)?;
 ConstantsVal:TRUE|FALSE|'null'|'ioat';
-SCIENTIFIC_NUMBER: FloatingNumbers('e' (PLUS|Minus)? NUMBER)?;
+SCIENTIFIC_NUMBER: FloatingNumbers('e' (PLUS|Minus)? NUMBER+)?;
 
-
-TRUE :'true';
-FALSE:'false';
 
 
 /////////////Other///////
@@ -137,13 +155,6 @@ logicalOperators:
     OR|
     NOT;
 
-conditionalOperators:
-    Equal|
-    NEqual|
-    GTHAN|
-    LTHAN|
-    LTHANEQ|
-    GTHANEQ;
 
 //Parentheses   1
 LPAR:'(';
@@ -206,7 +217,7 @@ BITXOR:'^';
 Equal:'==';
 
 //Not Equal  11
-NEqual:'!';
+NEqual:'!=';
 
 //<> ??????? 11
 
@@ -247,14 +258,7 @@ ASSIGNEXPON:'**=';
 ASSIGNFDIV:'//=';
 
 
-//NOT           14
-NOT:'not';
 
-//AND           14
-AND:'and';
-
-//OR            14
-OR:'or';
 
 
 
