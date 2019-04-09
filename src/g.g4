@@ -12,46 +12,52 @@ mainPart: '{' classDeclaration* '}';
 
 
 // Defining Class
-classDeclaration: classDef '\n<\n' statement ('\n>'|'>');
+classDeclaration: classDef leftBlock statement rightBlock;
 classDef: 'class' claseIdentifier ':' ;
 claseIdentifier :identifier;
 
 //Statements
-statement: (variableDecleration|functionDecleration)*;
+statement: (variableDecleration';'|functionDecleration)*;
 
 
 //Declering Functions
-functionDecleration:'Function' functionIdentifier '(' functionInputDecleration* ')' '<\n' functionCode '>';
-functionCode:(variableDecleration|ifStatement|forStatement|whileStatement|switchCaseStatement|equation)*;
+functionDecleration:'Function' functionIdentifier '(' functionInputDecleration* ')' leftBlock functionCode returnValue';' rightBlock;
+functionCode:(variableDecleration';'|ifStatement|forStatement|whileStatement|switchCaseStatement|equation';')*;
 functionInputDecleration:(varTypes identifier)(','varTypes identifier)*;
 
 functionIdentifier :identifier;
 
-
+returnValue: 'return' (identifier|expression|equation);
 
 //if Statement
-ifStatement:'if' '('conditionalExpressions')'(statement|'{'statement'}');
-
+ifStatement:'if' '('conditionalExpressions')' leftBlock functionCode rightBlock;
+leftBlock:'<'|'<\n'|'\n<'|'\n<\n';
+rightBlock:'>'|'>\n'|'\n>'|'\n>\n';
 //for Statement
-forStatement:'for('variableDecleration';'conditionalExpressions';'equalityExp'){'statement'}';
+forStatement:'for('variableDecleration';'conditionalExpressions';'equation')'  leftBlock functionCode rightBlock;
 
 //While Statement
-whileStatement:'while('conditionalExpressions'){'statement'}';
+whileStatement:'while('conditionalExpressions')' leftBlock functionCode rightBlock;
 
 //SwitchCase Statement
-switchCaseStatement:'c';
+switchCaseStatement:
+
+    'switch('expression'):' leftBlock(
+    ' case'expression':'
+    (leftBlock functionCode rightBlock|functionCode|) 'break;'?)+
+    ('default:'(leftBlock functionCode rightBlock|functionCode|))?
+    rightBlock;
+
 
 
 //Conditional Expression
 conditionalExpressions: conditionalOr ;
 conditionalOr: conditionalOr(OR conditionalAnd)|conditionalAnd ;
 conditionalAnd:conditionalAnd(AND term)|term;
-term: x|NOT term|ID |TRUE|FALSE;
+term: x|NOT term|ID |ConstantsVal;
 x:bitwiseExp((comparingOperators|equalityOperators) bitwiseExp)+;
 //comparingExpx:comparingExpx(equalityOperators bitwiseExp)|equalityExp(comparingOperators equalityExp);
 
-TRUE :'true';
-FALSE:'false';
 
 NOT:'not';
 AND:'and';
@@ -74,18 +80,19 @@ OR:'or';
 //parenthesesExp:(lPar (expression) rPar)|variable;
 
 //Expressions
-equation:identifier assignmentOperators expression';';
+equation:identifier assignmentOperators expression;
 
 expression: comparingExp;
 comparingExp:comparingExp(comparingOperators equalityExp)|equalityExp;
 equalityExp :equalityExp(equalityOperators bitwiseExp)|bitwiseExp;
-bitwiseExp :bitwiseExp(bitwiseOperators shiftExp)|shiftExp;
+bitwiseExp :bitwiseExp(bitwiseOperators underLineExp)|underLineExp;
+underLineExp:underLineExp(underLineOperators shiftExp)|shiftExp;
 shiftExp:hashtagExp(shiftOperators shiftExp)|hashtagExp;
 hashtagExp :plusMinusExp(hashtagOperators hashtagExp)|plusMinusExp;
 plusMinusExp:plusMinusExp(plustMinusOperators multDivExp)|multDivExp;
 multDivExp:multDivExp (multDivOperators signExp)|signExp;
-signExp:signOperators bitwiseNotExp ;
-bitwiseNotExp:exponentiationExp (bitwiseNotOperator exponentiationExp)*;
+signExp:signOperators? bitwiseNotExp ;
+bitwiseNotExp: bitwiseNotOperator? exponentiationExp;
 exponentiationExp :parenthesesExp (exponentiationOperator exponentiationExp)|parenthesesExp;
 parenthesesExp:(lPar (expression) rPar)|variable;
 
@@ -93,13 +100,14 @@ variable: (ID|IntNumbers|ConstantsVal|SCIENTIFIC_NUMBER|FloatingNumbers);
 
 assignmentOperators:ASSIGN|ASSIGNEXPON|ASSIGNDIV|ASSIGNFDIV|ASSIGNMULT|ASSIGNREM|ASSIGNMINUS|ASSIGNPLUS;
 comparingOperators:GTHANEQ|GTHAN|LTHANEQ|LTHAN;
-equalityOperators:Equal|NEqual;
+equalityOperators:Equal|NEqual|DoubleEq;
 bitwiseOperators:BITAND|BITOR|BITXOR;
+underLineOperators:Underline;
 shiftOperators:LSHIFT|RSHIFT;
-hashtagOperators:'#';
+hashtagOperators:Hashtag;
 plustMinusOperators:PLUS|Minus;
 multDivOperators:MULT|DIV|FDIV|REM;
-signOperators:(PLUS|Minus)?;
+signOperators:(PLUS|Minus);
 bitwiseNotOperator: BITNOT;
 exponentiationOperator:EXPONEN;
 lPar :LPAR;
@@ -108,9 +116,9 @@ rPar :RPAR;
 //Defining Variables///
 varTypes:intDecleration|floatDecleration|constantsDecleration;
 variableDecleration:intVar|floatVar|constantsVar;
-intVar: (intDecleration intIdentifier ('=' intVal)?(',' intIdentifier ('=' intVal)? )*';');
-floatVar:(floatDecleration floatIdentifier ('=' floatVal)?(',' floatIdentifier('=' floatVal)? )*';');
-constantsVar:(constantsDecleration constantsIdentifier ('='constantsVal)?(',' constantsIdentifier ('='constantsVal)? )*';');
+intVar: (intDecleration intIdentifier ('=' expression)?(',' intIdentifier ('=' expression)? )*);
+floatVar:(floatDecleration floatIdentifier ('=' expression)?(',' floatIdentifier('=' expression)? )*);
+constantsVar:(constantsDecleration constantsIdentifier ('='expression)?(',' constantsIdentifier ('='expression)? )*);
 
 
 intIdentifier:identifier;
@@ -126,14 +134,12 @@ IntType: 'int ';
 FloatType: 'float ';
 ConstantsType: 'constants ';
 
-intVal :IntNumbers|SCIENTIFIC_NUMBER;
-floatVal:FloatingNumbers|SCIENTIFIC_NUMBER;
-constantsVal :ConstantsVal;
-
 IntNumbers:NUMBER+;
 FloatingNumbers:NUMBER+('.'NUMBER+)?;
 ConstantsVal:TRUE|FALSE|'null'|'ioat';
 SCIENTIFIC_NUMBER: FloatingNumbers('e' (PLUS|Minus)? NUMBER+)?;
+TRUE :'true';
+FALSE:'false';
 
 
 
@@ -146,7 +152,6 @@ fragment LETTERS: 'a'..'z'|'A'..'Z';
 
 
 fragment NUMBER: '0' .. '9';
-
 
 /////////////Operators/////////
 
@@ -191,7 +196,7 @@ PLUS:'+';
 Minus:'-';
 
 
-//# ?????????? 7
+Hashtag: '#' ; // 7
 
 
 //Shift Right 8
@@ -201,7 +206,7 @@ RSHIFT: '>>';
 LSHIFT:'<<';
 
 
-//_ ????????  9
+Underline:'_'; //9
 
 
 //Bitwise and  10
@@ -219,7 +224,7 @@ Equal:'==';
 //Not Equal  11
 NEqual:'!=';
 
-//<> ??????? 11
+DoubleEq: '<>'; // 11
 
 //Less than  12
 LTHAN:'<';
@@ -262,9 +267,10 @@ ASSIGNFDIV:'//=';
 
 
 
-SE :('\n<\n' |'\n>')-> skip;
+//SE :('\n<\n' |'<\n' |'\n>'|'>\n'|'\n')-> skip;
 WS: (' ' | '\t') -> skip;
-NL: '\r'? '\n' -> skip;
+NEWLINE: [\r\n] -> skip;
+//NL: '\r'? '\n' -> skip;
 BlockComment : '/*' .*? '*/' -> skip;
 LineComment :'@' .*? '\n' ->skip;
 //Semi: ';'-> skip;
